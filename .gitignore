@@ -1,0 +1,37 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Local data and confidential files
+data/raw/
+data/private/
+secrets/
+*.key
+*.pem
+
+# Temporary Office files
+~$*.xlsx
+~$*.xls
+~$*.docx

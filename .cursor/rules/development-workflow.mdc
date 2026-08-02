@@ -1,0 +1,54 @@
+---
+description: Standard workflow for planning, implementing, testing, documenting, and pushing application changes.
+alwaysApply: true
+---
+
+# Development Workflow
+
+## Start of every task
+
+1. Read `AGENTS.md`.
+2. Read `docs/00_project-overview.md`.
+3. Read `docs/05_current-status.md`.
+4. Read the target feature specification and related ADRs.
+5. Inspect the existing code before proposing changes.
+6. Present an implementation plan before editing code.
+
+## During implementation
+
+- Do not change business rules without explicit approval.
+- Do not guess missing specifications.
+- Keep changes scoped to the approved feature or fix.
+- Follow existing architecture, naming, formatting, and test conventions.
+- Never commit secrets, credentials, personal data, or confidential production data.
+
+## Completion gate
+
+Before Commit or Push, all of the following must be true:
+
+- Implementation is complete.
+- Tests pass.
+- Build or type-check passes.
+- Acceptance criteria are satisfied.
+- Relevant docs are updated.
+- New architectural or business decisions are recorded.
+- Git diff is reviewed.
+- No secrets or confidential data are included.
+
+If any condition fails, do not Push.
+
+## Required documentation updates
+
+Update as applicable:
+
+- `docs/05_current-status.md`
+- `docs/changes/change-log.md`
+- `docs/testing/`
+- `docs/decisions/`
+
+## Git policy
+
+- Work on a feature branch unless explicitly instructed otherwise.
+- Do not force-push.
+- Do not push directly to main without human approval.
+- Report the branch, commit hash, tests, build result, and Push result after completion.
