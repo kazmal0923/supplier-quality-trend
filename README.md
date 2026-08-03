@@ -1,4 +1,8 @@
-# 品質不良率推移ダッシュボード
+# 仕入先品質トレンド
+
+**Supplier Quality Trend**
+
+仕入先・グループ別 現行不良率推移ダッシュボード
 
 Excel Power Queryで運用している品質管理ダッシュボードを、Webアプリとして再構築するプロジェクトです。
 各取引先の月別不良率推移を、正しい集計定義に基づいてブラウザから確認できるようにします。
@@ -127,7 +131,7 @@ Excel Power Queryで運用している品質管理ダッシュボードを、Web
 クローン先の説明には、次のプレースホルダーのみ使用します。
 
 ```text
-C:\Users\<ユーザー名>\Desktop\Projects\quality-defect-rate-dashboard
+C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 ```
 
 詳細は[`docs/06_development-setup.md`](docs/06_development-setup.md)を参照してください。

@@ -2,7 +2,7 @@
 
 ## 1. この文書の目的
 
-本書は、品質不良率推移ダッシュボードを新しいPCへCloneした際に、同じ開発環境を再現するための手順を記録する。
+本書は、仕入先品質トレンドを新しいPCへCloneした際に、同じ開発環境を再現するための手順を記録する。
 
 開発に必要なソフトウェア、バージョン、環境変数、起動方法、テスト方法、ビルド方法を一元管理する。
 
@@ -15,7 +15,7 @@
 ローカルのクローン先はPCごとに異なる。Git管理対象ファイルには実ユーザー名や実パスを記載せず、次のプレースホルダー形式のみ使用する。
 
 ```text
-C:\Users\<ユーザー名>\Desktop\Projects\quality-defect-rate-dashboard
+C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 ```
 
 実際のパスは、Git管理対象外の`.env`またはローカルメモで管理する。
@@ -54,8 +54,8 @@ src/app/
 
 ```powershell
 cd C:\Users\<ユーザー名>\Desktop\Projects
-git clone <REPOSITORY_URL>
-cd quality-defect-rate-dashboard
+git clone https://github.com/kazmal0923/supplier-quality-trend.git
+cd supplier-quality-trend
 ```
 
 Clone後に、以下を確認する。

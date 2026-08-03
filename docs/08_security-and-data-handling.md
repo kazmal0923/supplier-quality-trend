@@ -2,7 +2,7 @@
 
 ## 1. この文書の目的
 
-本書は、品質不良率推移ダッシュボードで扱う認証情報、社内データ、Excel / Power Query / CSV、テストデータ、ログなどの取扱ルールを定める。
+本書は、仕入先品質トレンドで扱う認証情報、社内データ、Excel / Power Query / CSV、テストデータ、ログなどの取扱ルールを定める。
 
 ---
 
@@ -159,7 +159,7 @@ PC固有の絶対パスは、ソースコードやGit管理対象の設計文書
 説明が必要な場合は、プレースホルダーのみ使用する。
 
 ```text
-C:\Users\<ユーザー名>\Desktop\Projects\quality-defect-rate-dashboard
+C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 ```
 
 必要な場合は、環境変数またはGit管理対象外の設定ファイルで管理する。

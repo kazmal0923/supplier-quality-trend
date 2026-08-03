@@ -2,7 +2,7 @@
 
 ## 1. この文書の目的
 
-本書は、品質不良率推移ダッシュボードの技術構成、主要コンポーネント、データフロー、ディレクトリ構成を記録する。
+本書は、仕入先品質トレンドの技術構成、主要コンポーネント、データフロー、ディレクトリ構成を記録する。
 
 業務要件は`docs/02_requirements.md`、データの詳細仕様は`docs/03_data-specification.md`、個別の重要な設計判断は`docs/decisions/`で管理する。
 
@@ -169,7 +169,7 @@ MVPの取込方式は、管理者アップロードを提案している。
 現時点（アプリコード未存在）：
 
 ```text
-quality-defect-rate-dashboard/
+supplier-quality-trend/
 ├─ docs/
 ├─ templates/
 ├─ .cursor/rules/
@@ -183,7 +183,7 @@ quality-defect-rate-dashboard/
 採用技術確定後の想定例（未確定）：
 
 ```text
-quality-defect-rate-dashboard/
+supplier-quality-trend/
 ├─ src/
 │  ├─ app/
 │  ├─ components/
@@ -315,4 +315,5 @@ MVP段階では、ローカル環境のみで開始する場合がある。
 
 | 日付 | 内容 | 更新者 |
 |---|---|---|
-| 2026-08-03 | 品質不良率推移ダッシュボード向け初版 | Cursor |
+| 2026-08-03 | 本プロジェクト向け初版 | Cursor |
+| 2026-08-03 | プロジェクト名称を「仕入先品質トレンド」に統一 | Cursor |

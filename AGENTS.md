@@ -202,7 +202,7 @@ PCごとにローカルの保存先は異なりますが、GitHub上のリポジ
 ローカルのクローン先は、次のプレースホルダー形式で扱います。実際のユーザー名や実パスはGit管理対象ファイルへ記載しません。
 
 ```text
-C:\Users\<ユーザー名>\Desktop\Projects\quality-defect-rate-dashboard
+C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 ```
 
 ### パスの扱い
