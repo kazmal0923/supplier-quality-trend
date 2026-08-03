@@ -1,8 +1,8 @@
-# FEATURE-001 不良率推移ダッシュボードMVP
+# FEATURE-001 仕入先品質トレンドMVP
 
 ## 背景
 
-Excel Power Queryで運用している不良率推移ダッシュボードをWeb化する。
+Excel Power Queryで運用している不良率推移の確認業務を、仕入先品質トレンドとしてWeb化する。
 
 ## 目的
 

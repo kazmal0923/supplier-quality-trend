@@ -2,8 +2,12 @@
 
 ## 1. 基本情報
 
-- プロジェクト名：不良率推移ダッシュボード
-- リポジトリ名：quality-defect-rate-dashboard
+- 日本語正式名称：仕入先品質トレンド
+- 英語表示名：Supplier Quality Trend
+- サブタイトル：仕入先・グループ別 現行不良率推移ダッシュボード
+- GitHubリポジトリ名：supplier-quality-trend
+- GitHub URL：https://github.com/kazmal0923/supplier-quality-trend.git
+- Python内部識別名：supplier_quality_trend
 - 開始日：要確認
 - 担当者：要確認
 - 現在のフェーズ：現状分析
