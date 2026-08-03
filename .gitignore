@@ -31,6 +31,10 @@ data/raw/
 data/private/
 data/production/
 secrets/
+config/settings.json
+config/supplier-name-aliases.csv
+web/data/dashboard-data.json
+web/data/update-status.json
 *.key
 *.pem
 

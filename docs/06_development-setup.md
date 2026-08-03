@@ -18,7 +18,7 @@
 C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 ```
 
-実際のパスは、Git管理対象外の`.env`またはローカルメモで管理する。
+実際の入力データパスは、Git管理対象外の`config/settings.json`で管理する。
 
 PCごとにローカルの保存先は異なるが、GitHub上のリポジトリ構成は同一に保つ。
 
@@ -28,9 +28,9 @@ PCごとにローカルの保存先は異なるが、GitHub上のリポジトリ
 
 - ソースコードでは、原則としてリポジトリ直下からの相対パスを使用する
 - PC固有の絶対パスをコードや設計文書へ直接記述しない
-- PC固有の設定は、環境変数またはGit管理対象外のローカル設定ファイルで管理する
-- 実値を含む`.env`はGitHubへPushしない
-- 共有する環境変数名は`.env.example`へ記載する
+- PC固有の設定は、Git管理対象外の`config/settings.json`で管理する
+- 実際の社内IPアドレス、Windowsアカウント名、本番データパスをGitへ記録しない
+- 公開用の設定例にはプレースホルダーだけを記載する
 
 良い例：
 
@@ -70,16 +70,17 @@ git branch --show-current
 
 ## 5. 必要なソフトウェア
 
-現時点では実行可能なアプリコードが存在しない。採用技術確定後に更新する。
+現時点では実行可能なアプリコードは存在しない。以下はMVP実装時に使用する予定構成である。
 
 | ソフトウェア | バージョン | 用途 | 状態 |
 |---|---:|---|---|
 | Git | 要記入 | バージョン管理 | 必要 |
 | Cursor | 最新安定版 | 実装・コード確認 | 必要 |
-| Node.js | 未定 | Webアプリ開発（採用時） | 未確定 |
-| Python | 未定 | データ処理（採用時） | 未確定 |
+| Python | 3.14 | データ読込・検証・集計・静的JSON生成 | 採用 |
+| Apache ECharts | バージョン未確定 | グラフ表示 | 採用 |
+| IIS | 移植先環境で確認 | `web/`の静的配信 | 採用 |
 
-使用しない項目は、採用技術確定時に削除する。
+Node.js、データベース、常駐Pythonサーバーは使用しない。
 
 ---
 
@@ -87,52 +88,58 @@ git branch --show-current
 
 現時点：該当なし（アプリコード未存在）
 
-採用技術の決定後に、実際のコマンドへ置き換える。
-
-### Node.jsを採用した場合の例
+MVP実装後の予定実行コマンド：
 
 ```powershell
-npm install
+python main.py
 ```
 
-### Pythonを採用した場合の例
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
+仮想環境は使用しない。Python標準ライブラリを優先する。
 
 ---
 
 ## 7. 環境変数
 
-現時点では必須の環境変数はない。
+現時点では必須の環境変数はない。入力データ等の本番パスは、Git管理外の`config/settings.json`で管理する。
 
-実際の値は`.env`へ設定し、GitHubへPushしない。
-
-共有する環境変数名と用途は`.env.example`へ記載する。
-
-`.env`の作成例：
-
-```powershell
-Copy-Item .env.example .env
-```
-
-将来、入力・出力ディレクトリが必要になった場合の候補：
+文書や公開用の設定例では、実パスを記載せずプレースホルダーを使用する。
 
 ```text
-# INPUT_DATA_DIR=
-# OUTPUT_DATA_DIR=
+月次CSVフォルダー: <月次CSVフォルダー>
+仕入先マスタ: <仕入先マスタファイル>
 ```
+
+ユーザーホームは`Path.home()`で取得し、そこからの相対パスを`settings.json`で管理する。アプリディレクトリは`main.py`の配置場所を基準に取得し、Windowsアカウント名をコードや設定例へ固定しない。
 
 ---
 
-## 8. 開発サーバーの起動
+## 8. 実行・公開方法
 
 現時点：該当なし（実行可能なアプリコードが存在しない）
 
-採用技術の決定後に、実際のコマンドへ置き換える。
+MVP実装後は`python main.py`または`run.bat`で表示用JSONを生成する。常駐Pythonサーバーは起動せず、静的な`web/`をIISで配信する。
+
+- 予定配置先：`C:\var\supplier-quality-trend`
+- IISサイト物理パス：`C:\var\supplier-quality-trend\web`
+- URL例：`http://<社内IISサーバー>/`
+- 既定ドキュメント：`index.html`
+
+実際のURL、IIS設定、アクセス権は移植時に確認する。
+
+### タスクスケジューラ
+
+MVP実装後の予定設定：
+
+- 毎週月曜日、午前8時
+- プログラム：`run.bat`
+- 引数：`scheduled`
+- 開始フォルダー：アプリディレクトリ
+- 開始時刻を逃した場合は可能になり次第実行
+- 失敗時は10分間隔で最大3回再試行
+- 二重起動しない
+- 最大実行時間30分
+
+手動実行の`run.bat`は成功時に自動終了し、失敗時だけ`logs/error.log`の場所を表示して一時停止する。`run.bat scheduled`は一時停止せず、成功時0、失敗時1を返す。
 
 ---
 
@@ -152,17 +159,7 @@ Copy-Item .env.example .env
 - Git差分
 - 機密情報・実データ・実絶対パスの混入がないこと
 
-採用技術決定後の例：
-
-```powershell
-npm test
-```
-
-または
-
-```powershell
-pytest
-```
+実装後の具体的なテストコマンドは未確定。
 
 ---
 
@@ -187,8 +184,11 @@ pytest
 | 用途 | 置き場所 | Git管理 |
 |---|---|---|
 | 匿名化または架空サンプル | `data/samples/`（作成時） | 可（機密を含まないこと） |
-| 現行Excel原本・実CSV | `data/raw/` または `data/private/` | 不可 |
-| 本番データ | `data/private/` または社内保管場所 | 不可 |
+| 本番月次CSV・仕入先マスタ原本 | `settings.json`で指定するGit外の場所 | 不可 |
+| 実設定 | `config/settings.json` | 不可 |
+| 実エイリアス | `config/supplier-name-aliases.csv` | 不可 |
+| 生成された本番JSON | `web/data/` | 不可 |
+| ログ | `logs/` | 不可 |
 
 ExcelやCSVを拡張子単位で一律除外しない。保存場所単位で管理する。
 
