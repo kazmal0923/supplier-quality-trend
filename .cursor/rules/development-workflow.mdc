@@ -7,12 +7,18 @@ alwaysApply: true
 
 ## Start of every task
 
-1. Read `AGENTS.md`.
-2. Read `docs/00_project-overview.md`.
-3. Read `docs/05_current-status.md`.
-4. Read the target feature specification and related ADRs.
-5. Inspect the existing code before proposing changes.
-6. Present an implementation plan before editing code.
+1. Check Git state first.
+   - `git status`
+   - `git branch --show-current`
+   - If the working tree is clean, run `git pull --ff-only`
+   - Do not pull over uncommitted changes without reviewing them
+2. Read `AGENTS.md`.
+3. Read `README.md`.
+4. Read `docs/00_project-overview.md` and `docs/05_current-status.md`.
+5. Read related docs under `docs/01` to `docs/08`, features, decisions, and testing as needed.
+6. Inspect the existing code and configuration before proposing changes.
+7. Present an implementation plan before editing code or docs.
+8. Do not edit until a human approves the plan.
 
 ## During implementation
 
@@ -20,35 +26,75 @@ alwaysApply: true
 - Do not guess missing specifications.
 - Keep changes scoped to the approved feature or fix.
 - Follow existing architecture, naming, formatting, and test conventions.
+- Separate UI, business logic, and data access.
 - Never commit secrets, credentials, personal data, or confidential production data.
+- Do not hardcode PC-specific absolute paths. Use repository-relative paths or environment variables.
+- Real absolute paths belong only in local `.env` or private notes, never in Git-managed files.
+
+## Multi-PC and Pull Request policy
+
+- Keep the GitHub repository structure identical across PCs.
+- Do not edit the same branch on multiple PCs at the same time.
+- Finish Commit and Push on the current PC before continuing on another PC.
+- Integrate to main through a Pull Request after human review.
+- Do not push directly to main without human approval.
+- Do not force-push.
 
 ## Completion gate
 
 Before Commit or Push, all of the following must be true:
 
-- Implementation is complete.
-- Tests pass.
-- Build or type-check passes.
+- Implementation or documentation change is complete.
+- Required tests pass, or are recorded as not applicable with reasons.
+- Required build, type-check, and lint pass, or are recorded as not applicable with reasons.
 - Acceptance criteria are satisfied.
 - Relevant docs are updated.
 - New architectural or business decisions are recorded.
 - Git diff is reviewed.
-- No secrets or confidential data are included.
+- No secrets, confidential data, or real absolute paths are included.
+- Human-required open questions are not left unresolved.
 
 If any condition fails, do not Push.
+
+## When tests or builds do not exist
+
+- Do not invent or force test, lint, type-check, or build commands.
+- Record those items as not applicable with reasons.
+- For documentation-only or pre-implementation work, verify Markdown, links, structure, `git diff --check`, and absence of secrets.
 
 ## Required documentation updates
 
 Update as applicable:
 
 - `docs/05_current-status.md`
+- `docs/06_development-setup.md`
+- `docs/07_architecture.md`
+- `docs/08_security-and-data-handling.md`
 - `docs/changes/change-log.md`
 - `docs/testing/`
 - `docs/decisions/`
 
-## Git policy
+## Security and data handling
 
-- Work on a feature branch unless explicitly instructed otherwise.
-- Do not force-push.
-- Do not push directly to main without human approval.
-- Report the branch, commit hash, tests, build result, and Push result after completion.
+Follow `docs/08_security-and-data-handling.md`.
+
+Do not commit:
+
+- `.env`
+- API keys, passwords, tokens, cookies, private keys
+- real personal or customer data
+- unprocessed production Excel/CSV
+- confidential internal source files
+
+## End-of-task report
+
+Report:
+
+- Changed files
+- What was done
+- Test, type-check, lint, and build results
+- Items marked not applicable and why
+- Updated docs
+- Open issues
+- Commit hash and Push branch when applicable
+- Whether a Pull Request is needed
