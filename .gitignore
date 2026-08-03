@@ -25,8 +25,11 @@ Thumbs.db
 .vscode/
 
 # Local data and confidential files
+# Exclude by storage location, not by Excel/CSV extension,
+# so anonymized samples under data/samples/ can be tracked later.
 data/raw/
 data/private/
+data/production/
 secrets/
 *.key
 *.pem
