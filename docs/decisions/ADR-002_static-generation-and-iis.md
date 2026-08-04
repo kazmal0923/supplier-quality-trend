@@ -18,6 +18,7 @@ MVPでは、現行Excelと同一条件の集計を定期的に再生成し、社
 - JSONは一時ファイルへ出力し、全検証成功後に本番ファイルと置換する
 - 更新失敗時は前回正常データを維持する
 - 画面は静的HTML／CSS／JavaScriptで構築する
+- 任意期間の期間全体現行不良率は、Pythonが生成した月別集計済み数量をブラウザで合算して再計算する
 - グラフにはApache EChartsを使用し、CDNを使わずライセンスとともにアプリ内へ配置する
 - IISでは`web/`だけを静的配信する
 - データベースと常駐Pythonサーバーは使用しない
@@ -32,10 +33,10 @@ MVPでは、現行Excelと同一条件の集計を定期的に再生成し、社
 
 ## 影響
 
-- 画面は生成済みJSONだけを参照し、ブラウザ上で業務集計を再計算しない
+- 画面は生成済みJSONだけを参照し、CSV解析や仕入先・グループ単位の明細集計は行わない
 - 入力パス等はGit管理外の`config/settings.json`で管理する
 - 本番CSV、仕入先マスタ、実エイリアス、生成された本番JSON、ログはGit管理しない
-- Apache EChartsのバージョンと対象ブラウザは実装前に確定する必要がある
+- Apache ECharts 6.1.0をアプリ内へ配置し、Microsoft Edge、Google Chrome、Mozilla Firefoxの各最新版を対象とする
 - IISの実URL、アクセス権、タスク実行アカウントは移植時に確認する
 
 実行モードとタスク設定の詳細は`docs/02_requirements.md`および`docs/06_development-setup.md`を正とする。

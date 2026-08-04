@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>仕入先品質トレンド</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Supplier Quality Trend</p>
+        <h1>仕入先品質トレンド</h1>
+        <p class="subtitle">仕入先・グループ別 現行不良率推移ダッシュボード</p>
+      </div>
+      <dl class="update-summary">
+        <div><dt>最終更新</dt><dd id="generated-at">—</dd></div>
+        <div><dt>最新データ月</dt><dd id="latest-month">—</dd></div>
+        <div><dt>警告</dt><dd id="warning-count">—</dd></div>
+      </dl>
+    </header>
+
+    <main>
+      <section class="notice" aria-label="現行不良率の注意事項">
+        <strong>現行不良率について</strong>
+        <p>本画面の不良率は、当月に出荷した商品のうち、返品が発生したSKUの出荷数を分母として算出しています。返品が発生していないSKUの出荷数は分母に含まれないため、仕入先全体の正式な不良率とは異なります。現行集計条件に基づく傾向確認用の指標として参照してください。集計条件により、100％を超える場合があります。</p>
+      </section>
+
+      <section class="panel controls" aria-label="表示条件">
+        <div class="field">
+          <label for="mode">閲覧モード</label>
+          <select id="mode">
+            <option value="supplier">単一仕入先</option>
+            <option value="group">仕入先グループ</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="category">国内／海外</label>
+          <select id="category"><option value="">すべて</option></select>
+        </div>
+        <div class="field field-wide">
+          <label for="search">仕入先ID・名称検索</label>
+          <input id="search" type="search" placeholder="IDまたは名称">
+        </div>
+        <div class="field field-wide">
+          <label for="entity">仕入先／グループ</label>
+          <select id="entity"></select>
+        </div>
+        <div class="field">
+          <label for="start-month">開始月</label>
+          <input id="start-month" type="month">
+        </div>
+        <div class="field">
+          <label for="end-month">終了月</label>
+          <input id="end-month" type="month">
+        </div>
+      </section>
+
+      <p id="screen-message" class="screen-message" role="status"></p>
+
+      <section class="kpi-grid" aria-label="主要指標">
+        <article class="kpi"><span>最新月現行不良率</span><strong id="latest-rate">—</strong></article>
+        <article class="kpi"><span>前年同月現行不良率</span><strong id="previous-rate">—</strong></article>
+        <article class="kpi"><span>前年同月差</span><strong id="rate-difference">—</strong></article>
+        <article class="kpi"><span>最新月返品数</span><strong id="latest-returns">—</strong></article>
+        <article class="kpi"><span>最新月出荷数</span><strong id="latest-shipments">—</strong></article>
+        <article class="kpi"><span>期間全体現行不良率</span><strong id="period-rate">—</strong></article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h2>現行不良率推移</h2>
+            <p id="selected-entity-name">仕入先を選択してください</p>
+          </div>
+          <span class="target-label">目標 1％未満</span>
+        </div>
+        <div id="trend-chart" class="chart" role="img" aria-label="現行不良率推移グラフ"></div>
+      </section>
+
+      <section class="panel">
+        <h2>月別詳細</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>対象年月</th>
+                <th>出荷数</th>
+                <th>返品数</th>
+                <th>現行不良率</th>
+                <th>目標判定</th>
+                <th>データ状態</th>
+                <th>警告</th>
+              </tr>
+            </thead>
+            <tbody id="detail-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="vendor/echarts/echarts.min.js"></script>
+    <script src="chart.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+{
+  "monthly_csv_directory": "<USER_HOME_RELATIVE_MONTHLY_CSV_DIRECTORY>",
+  "supplier_master_file": "<USER_HOME_RELATIVE_SUPPLIER_MASTER_FILE>"
+}

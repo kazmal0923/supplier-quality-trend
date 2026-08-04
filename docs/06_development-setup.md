@@ -70,14 +70,14 @@ git branch --show-current
 
 ## 5. 必要なソフトウェア
 
-現時点では実行可能なアプリコードは存在しない。以下はMVP実装時に使用する予定構成である。
+MVPの実行可能なアプリコードとテストコードを実装済みである。
 
 | ソフトウェア | バージョン | 用途 | 状態 |
 |---|---:|---|---|
 | Git | 要記入 | バージョン管理 | 必要 |
 | Cursor | 最新安定版 | 実装・コード確認 | 必要 |
 | Python | 3.14 | データ読込・検証・集計・静的JSON生成 | 採用 |
-| Apache ECharts | バージョン未確定 | グラフ表示 | 採用 |
+| Apache ECharts | 6.1.0 | グラフ表示 | 採用 |
 | IIS | 移植先環境で確認 | `web/`の静的配信 | 採用 |
 
 Node.js、データベース、常駐Pythonサーバーは使用しない。
@@ -86,11 +86,11 @@ Node.js、データベース、常駐Pythonサーバーは使用しない。
 
 ## 6. 初期セットアップ
 
-現時点：該当なし（アプリコード未存在）
-
-MVP実装後の予定実行コマンド：
+公開用設定例をローカル設定へコピーし、実際の入力パスとエイリアスを設定する。
 
 ```powershell
+Copy-Item config/settings.example.json config/settings.json
+Copy-Item config/supplier-name-aliases.example.csv config/supplier-name-aliases.csv
 python main.py
 ```
 
@@ -115,9 +115,15 @@ python main.py
 
 ## 8. 実行・公開方法
 
-現時点：該当なし（実行可能なアプリコードが存在しない）
+`python main.py`または`run.bat`で表示用JSONを生成する。常駐Pythonサーバーは起動せず、静的な`web/`をIISで配信する。
 
-MVP実装後は`python main.py`または`run.bat`で表示用JSONを生成する。常駐Pythonサーバーは起動せず、静的な`web/`をIISで配信する。
+開発時の匿名サンプル画面は、次のコマンドとURLで確認する。
+
+```powershell
+python -m http.server 8000 --directory web
+```
+
+`http://localhost:8000/?example=1`
 
 - 予定配置先：`C:\var\supplier-quality-trend`
 - IISサイト物理パス：`C:\var\supplier-quality-trend\web`
@@ -128,7 +134,7 @@ MVP実装後は`python main.py`または`run.bat`で表示用JSONを生成する
 
 ### タスクスケジューラ
 
-MVP実装後の予定設定：
+移植時の予定設定：
 
 - 毎週月曜日、午前8時
 - プログラム：`run.bat`
@@ -145,37 +151,24 @@ MVP実装後の予定設定：
 
 ## 9. テスト
 
-現時点：該当なし（テストコマンド未整備）
+```powershell
+python -m unittest discover -s tests -v
+python -m compileall main.py supplier_quality_trend tests
+```
 
-理由：実行可能なアプリコードが存在しないため。
-
-現時点の確認相当：
-
-- Markdownの表示
-- リンク切れがないこと
-- ファイル構成
-- 文書間の矛盾がないこと
-- `git diff --check`
-- Git差分
-- 機密情報・実データ・実絶対パスの混入がないこと
-
-実装後の具体的なテストコマンドは未確定。
+加えて、匿名サンプル画面のHTTP応答、フィルター、KPI、詳細表、グラフ、空状態を対象ブラウザで確認する。
 
 ---
 
 ## 10. 型チェック・Lint
 
-現時点：該当なし
-
-理由：実行可能なアプリコードおよび関連コマンドが存在しないため。
+Python構文は`compileall`、JavaScript構文は利用可能な場合に`node --check`、IDE診断はCursorの診断機能で確認する。専用の静的型チェッカーとLintツールは導入していない。
 
 ---
 
 ## 11. ビルド
 
-現時点：該当なし
-
-理由：実行可能なアプリコードが存在しないため。
+該当なし。Pythonバッチと静的HTML／CSS／JavaScriptで構成し、ビルド工程を持たないため。
 
 ---
 
@@ -183,7 +176,7 @@ MVP実装後の予定設定：
 
 | 用途 | 置き場所 | Git管理 |
 |---|---|---|
-| 匿名化または架空サンプル | `data/samples/`（作成時） | 可（機密を含まないこと） |
+| 匿名化または架空サンプル | `tests/fixtures/`、`web/data/*.example.json` | 可（機密を含まないこと） |
 | 本番月次CSV・仕入先マスタ原本 | `settings.json`で指定するGit外の場所 | 不可 |
 | 実設定 | `config/settings.json` | 不可 |
 | 実エイリアス | `config/supplier-name-aliases.csv` | 不可 |
