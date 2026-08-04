@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-02-15T08:00:00+00:00",
+  "latestDataMonth": "2026-02",
+  "defaultPeriod": {
+    "startMonth": "2025-02",
+    "endMonth": "2026-02"
+  },
+  "warningCount": 0,
+  "entities": [
+    {
+      "entityId": "supplier:S001",
+      "entityType": "supplier",
+      "displayName": "架空仕入先A",
+      "category": "国内仕入れ",
+      "supplierIds": ["S001"],
+      "supplierNames": ["架空仕入先A"],
+      "months": [
+        {
+          "targetMonth": "2025-02",
+          "returnQuantity": "1",
+          "shipmentQuantity": "120",
+          "defectiveRate": "0.008333333333333333",
+          "statuses": [],
+          "warningCodes": []
+        },
+        {
+          "targetMonth": "2026-01",
+          "returnQuantity": "2",
+          "shipmentQuantity": "100",
+          "defectiveRate": "0.02",
+          "statuses": ["target_exceeded"],
+          "warningCodes": []
+        },
+        {
+          "targetMonth": "2026-02",
+          "returnQuantity": "3",
+          "shipmentQuantity": "150",
+          "defectiveRate": "0.02",
+          "statuses": ["target_exceeded", "in_progress"],
+          "warningCodes": []
+        }
+      ]
+    },
+    {
+      "entityId": "group:auto:国内仕入れ:架空仕入先A",
+      "entityType": "group",
+      "displayName": "架空仕入先A",
+      "category": "国内仕入れ",
+      "supplierIds": ["S001"],
+      "supplierNames": ["架空仕入先A"],
+      "months": [
+        {
+          "targetMonth": "2025-02",
+          "returnQuantity": "1",
+          "shipmentQuantity": "120",
+          "defectiveRate": "0.008333333333333333",
+          "statuses": [],
+          "warningCodes": []
+        },
+        {
+          "targetMonth": "2026-01",
+          "returnQuantity": "2",
+          "shipmentQuantity": "100",
+          "defectiveRate": "0.02",
+          "statuses": ["target_exceeded"],
+          "warningCodes": []
+        },
+        {
+          "targetMonth": "2026-02",
+          "returnQuantity": "3",
+          "shipmentQuantity": "150",
+          "defectiveRate": "0.02",
+          "statuses": ["target_exceeded", "in_progress"],
+          "warningCodes": []
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}

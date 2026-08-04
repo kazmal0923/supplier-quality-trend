@@ -78,11 +78,7 @@ Excel Power Queryで運用している不良率推移の確認業務を、仕入
 
 ## 未確定事項
 
-- `SYUKKA_SU=0`の場合の不良率表示値
-- `DEFECTIVE_RATE`の値形式と照合許容差
-- 空欄、非数値、負数の処理
-- 初期エイリアス一覧と文字正規化
-- 国内・海外をまたぐグループの扱い
-- 対象ブラウザ、IISアクセス権、実行アカウント
+- 初期エイリアス一覧
+- IISアクセス権、実行アカウント
 
 未確定事項の全体状況は`docs/05_current-status.md`、データ固有事項は`docs/03_data-specification.md`、技術固有事項は`docs/07_architecture.md`を正とする。

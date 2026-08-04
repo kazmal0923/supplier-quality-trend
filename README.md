@@ -24,10 +24,10 @@ Excel Power Queryで運用している品質管理ダッシュボードを、静
 
 ## 現状
 
-- フェーズ：MVP基本設計確定 / 実装前
-- 実行可能なアプリコードはまだ存在しない
-- MVPの業務仕様、データ仕様、受入条件、技術構成を設計文書へ反映済み
-- 0除算表示、照合許容差、異常入力等は未確定事項として管理
+- フェーズ：MVP実装済み / 実データ検証・IIS移植前
+- Pythonバッチ、静的Web、テストコードを実装済み
+- 匿名データによる自動テストとローカル静的配信を確認済み
+- 現行Excelとの実データ比較、IIS設定、タスクスケジューラ登録は未実施
 - ルートの`docs/`を正式な正本として管理する
 
 詳細は`docs/05_current-status.md`を参照してください。
@@ -158,7 +158,7 @@ C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 - 複数PCへの影響
 - 未解決事項
 
-現時点では実行可能なアプリコードがないため、テスト・型チェック・Lint・ビルドは「該当なし」とし、Markdown、リンク、ファイル構成、Git差分、機密情報混入を確認します。
+Python標準ライブラリの`unittest`と`compileall`、JavaScript構文確認、ローカル静的配信、Git差分・機密情報混入を確認します。
 
 ---
 
@@ -168,6 +168,9 @@ C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 .
 ├─ .cursor/rules/
 ├─ .github/pull_request_template.md
+├─ config/
+│  ├─ settings.example.json
+│  └─ supplier-name-aliases.example.csv
 ├─ docs/
 │  ├─ 00_project-overview.md
 │  ├─ 01_current-state-analysis.md
@@ -182,10 +185,17 @@ C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 │  ├─ decisions/
 │  ├─ testing/
 │  └─ changes/
+├─ supplier_quality_trend/
+├─ tests/
+├─ web/
+│  ├─ data/
+│  └─ vendor/echarts/
 ├─ templates/
 ├─ .env.example
 ├─ .gitignore
 ├─ AGENTS.md
+├─ main.py
+├─ run.bat
 └─ README.md
 ```
 
@@ -196,6 +206,25 @@ C:\Users\<ユーザー名>\Desktop\Projects\supplier-quality-trend
 現時点では必須の環境変数はありません。
 
 本番の入力パス等は、実装時にGit管理外の`config/settings.json`で管理します。公開用の設定例にはプレースホルダーだけを記載し、実際の社内IPアドレス、Windowsアカウント名、本番データパスは含めません。
+
+```powershell
+Copy-Item config/settings.example.json config/settings.json
+Copy-Item config/supplier-name-aliases.example.csv config/supplier-name-aliases.csv
+```
+
+ローカル設定を入力後、次でバッチを実行します。
+
+```powershell
+python main.py
+```
+
+匿名サンプル画面は次で確認できます。
+
+```powershell
+python -m http.server 8000 --directory web
+```
+
+ブラウザで`http://localhost:8000/?example=1`を開きます。
 
 ---
 

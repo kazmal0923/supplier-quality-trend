@@ -10,7 +10,7 @@
 - Python内部識別名：supplier_quality_trend
 - 開始日：要確認
 - 担当者：要確認
-- 現在のフェーズ：MVP基本設計確定・実装前
+- 現在のフェーズ：MVP実装済み・実データ受入前
 
 ## 2. 背景
 
@@ -74,7 +74,7 @@ AS-ISの未確認事項は`docs/01_current-state-analysis.md`、MVPのTO-BEデ�
 
 ## 9. 制約
 
-- 利用環境：静的Webを社内IISで配信する。対象ブラウザは未確定
+- 利用環境：静的Webを社内IISで配信する。Microsoft Edge、Google Chrome、Mozilla Firefoxの各最新版を対象とする
 - ネットワーク：実際のIIS URL、アクセス権は移植時に確認する
 - データ保管：Publicリポジトリへ実データ、現行Excel原本、仕入先マスタ原本、生成された本番JSON、実設定、ログを保存しない
 - 認証：未確定
