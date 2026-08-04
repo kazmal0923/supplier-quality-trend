@@ -73,7 +73,7 @@ class PipelineTest(unittest.TestCase):
                 run_pipeline(root)
             self.assertEqual(dashboard_path.read_bytes(), previous)
 
-    def test_no_valid_rows_keeps_previous_dashboard(self) -> None:
+    def test_short_row_with_no_valid_rows_keeps_previous_dashboard(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             monthly = self._prepare_root(root)
@@ -84,12 +84,69 @@ class PipelineTest(unittest.TestCase):
             (monthly / "2026年01月.csv").write_text(
                 "SHIIRESAKI_ID,SHIIRESAKI_NM,HENPIN_SU,"
                 "SYUKKA_SU,DEFECTIVE_RATE\n"
-                "S001,旧架空仕入先A,invalid,100,0.01\n",
+                "S001,旧架空仕入先A,1\n",
                 encoding="utf-8",
             )
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as context:
                 run_pipeline(root)
+            self.assertEqual(
+                context.exception.warnings[0].code,
+                "INVALID_SYUKKA_SU",
+            )
             self.assertEqual(dashboard_path.read_bytes(), previous)
+
+    def test_short_quantity_row_is_excluded_with_warning(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            monthly = self._prepare_root(root)
+            (monthly / "2026年01月.csv").write_text(
+                "SHIIRESAKI_ID,SHIIRESAKI_NM,HENPIN_SU,"
+                "SYUKKA_SU,DEFECTIVE_RATE\n"
+                "S001,旧架空仕入先A,1\n"
+                "S002,架空仕入先B,2,100,0.02\n",
+                encoding="utf-8",
+            )
+            run_pipeline(root)
+            dashboard = json.loads(
+                (root / "web/data/dashboard-data.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        self.assertNotIn(
+            "supplier:S001",
+            {entity["entityId"] for entity in dashboard["entities"]},
+        )
+        self.assertIn(
+            "INVALID_SYUKKA_SU",
+            {warning["code"] for warning in dashboard["warnings"]},
+        )
+
+    def test_empty_defective_rate_recalculates_from_quantities(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            monthly = self._prepare_root(root)
+            (monthly / "2026年01月.csv").write_text(
+                "SHIIRESAKI_ID,SHIIRESAKI_NM,HENPIN_SU,"
+                "SYUKKA_SU,DEFECTIVE_RATE\n"
+                "S001,旧架空仕入先A,1,100,\n",
+                encoding="utf-8",
+            )
+            run_pipeline(root)
+            dashboard = json.loads(
+                (root / "web/data/dashboard-data.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        supplier = next(
+            entity
+            for entity in dashboard["entities"]
+            if entity["entityId"] == "supplier:S001"
+        )
+        self.assertEqual(supplier["months"][-1]["defectiveRate"], "0.01")
+        self.assertIn(
+            "INVALID_DEFECTIVE_RATE",
+            {warning["code"] for warning in dashboard["warnings"]},
+        )
 
 
 if __name__ == "__main__":

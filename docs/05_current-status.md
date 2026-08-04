@@ -33,7 +33,7 @@ Pythonバッチ、静的Web、Apache ECharts、Windows実行バッチ、自動�
 | Pull Request運用 | 整備済み   | PRテンプレートを追加                                   |
 | 環境変数管理         | 初期整備済み | 現時点で必須環境変数なし                                  |
 | アプリ実装          | MVP実装済み    | Pythonバッチ、静的Web、`run.bat`を実装                                    |
-| テスト            | 自動テスト済み   | 匿名データによる51件の`unittest`が成功                                 |
+| テスト            | 自動テスト済み   | 匿名データによる58件の`unittest`が成功                                 |
 | 型チェック          | 専用ツールなし   | 型ヒントを使用し、`compileall`で構文確認                                 |
 | Lint           | 診断済み   | IDE診断でエラーなし                                 |
 | ビルド            | 該当なし   | ビルド工程を持たない静的構成                                 |
@@ -46,7 +46,7 @@ Pythonバッチ、静的Web、Apache ECharts、Windows実行バッチ、自動�
 
 - UTF-8月次CSV、CP932仕入先マスタ、UTF-8エイリアスの読込
 - 入力検証、警告、単一仕入先・仕入先グループ集計
-- 数量不正行の除外と警告詳細、出荷数0の算出不可表示、`DEFECTIVE_RATE`照合許容差`1E-12`
+- 数量の非負整数検証、不正行の除外と警告詳細、出荷数0の算出不可表示、`DEFECTIVE_RATE`照合許容差`1E-12`
 - 最新13か月、前年同月、目標判定、欠損月、集計途中の生成
 - スキーマバージョン1のJSON生成と原子的置換
 - 静的画面、期間フィルター、KPI、詳細表、Apache EChartsグラフ
@@ -190,7 +190,7 @@ IISの実URL、アクセス権、タスク実行アカウントを確定し、`w
 
 ## 現在の検証状況
 
-- `python -m unittest discover -s tests -v`：51件成功
+- `python -m unittest discover -s tests -v`：58件成功
 - `python -m compileall main.py supplier_quality_trend tests`：成功
 - `node --check web/app.js`、`node --check web/chart.js`：成功
 - ローカルHTTP配信：画面、匿名サンプルJSON、ローカルEChartsがHTTP 200

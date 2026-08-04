@@ -23,7 +23,7 @@ class ValidationError(ValueError):
         self.warnings = warnings
 
 
-def _parse_non_negative_quantity(
+def _parse_non_negative_integer_quantity(
     raw_value: str,
     *,
     field_name: str,
@@ -37,7 +37,11 @@ def _parse_non_negative_quantity(
         if not normalized:
             raise InvalidOperation
         value = Decimal(normalized)
-        if not value.is_finite() or value < 0:
+        if (
+            not value.is_finite()
+            or value < 0
+            or value != value.to_integral_value()
+        ):
             raise InvalidOperation
         return value, None
     except (InvalidOperation, ValueError):
@@ -140,12 +144,12 @@ def _parse_monthly_row(
         "source_file": monthly_file.source_path.name,
         "line_number": line_number,
     }
-    return_quantity, return_warning = _parse_non_negative_quantity(
+    return_quantity, return_warning = _parse_non_negative_integer_quantity(
         row["HENPIN_SU"],
         field_name="HENPIN_SU",
         **common,
     )
-    shipment_quantity, shipment_warning = _parse_non_negative_quantity(
+    shipment_quantity, shipment_warning = _parse_non_negative_integer_quantity(
         row["SYUKKA_SU"],
         field_name="SYUKKA_SU",
         **common,

@@ -29,10 +29,11 @@ class MonthlyCsvTest(unittest.TestCase):
         encoding: str = "utf-8",
         newline: str = "\n",
         header: str = HEADER,
+        row: str = ROW,
     ) -> Path:
         path = directory / filename
         path.write_bytes(
-            f"{header}{newline}{ROW}{newline}".encode(encoding)
+            f"{header}{newline}{row}{newline}".encode(encoding)
         )
         return path
 
@@ -72,6 +73,17 @@ class MonthlyCsvTest(unittest.TestCase):
                 MonthlyCsvError, "DEFECTIVE_RATE"
             ):
                 read_monthly_csv(path)
+
+    def test_short_row_converts_missing_items_to_empty_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = self._write_csv(
+                Path(temporary),
+                row="S001,架空仕入先A,1",
+            )
+            loaded = read_monthly_csv(path)
+        self.assertEqual(loaded.rows[0]["HENPIN_SU"], "1")
+        self.assertEqual(loaded.rows[0]["SYUKKA_SU"], "")
+        self.assertEqual(loaded.rows[0]["DEFECTIVE_RATE"], "")
 
     def test_discovers_multiple_months_in_order(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

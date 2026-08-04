@@ -37,7 +37,10 @@ ExcelとWebアプリの集計結果を比較する検証データと結果を記
 
 - `HENPIN_SU`空欄の行除外と警告詳細
 - `SYUKKA_SU`空欄の行除外と警告詳細
-- 数量の非数値・負数による行除外
+- 数量の整数表記と整数相当表記（`1.0`・`2.00`）
+- 数量の非整数（`1.5`・`0.25`）による行除外と警告
+- 数量の非数値・非有限値・負数による行除外
+- 項目数不足行の空文字変換、行除外、有効行0件
 - 両数量不正時のカラム別警告と1回だけの行除外
 - 月次CSV内の有効行0件による更新失敗と前回正常JSON維持
 - 返品数0
@@ -50,6 +53,7 @@ ExcelとWebアプリの集計結果を比較する検証データと結果を記
 - 1％境界値（1％ちょうどは目標超過扱い）
 - `DEFECTIVE_RATE`の絶対差`1E-12`以内の微小誤差
 - 明確な`DEFECTIVE_RATE`不一致
+- `DEFECTIVE_RATE`空欄時の警告、行保持、数量からの再計算
 - `DEFECTIVE_RATE`が集計値へ影響しないこと
 
 ### 期間・表示
@@ -74,7 +78,7 @@ ExcelとWebアプリの集計結果を比較する検証データと結果を記
 
 ## 2026-08-04 MVP実装確認
 
-- `python -m unittest discover -s tests -v`：51件成功（数量不正行、出荷数0、`DEFECTIVE_RATE`照合を含む）
+- `python -m unittest discover -s tests -v`：58件成功（数量整数検証、項目数不足行、`DEFECTIVE_RATE`空欄を含む）
 - `python -m compileall main.py supplier_quality_trend tests`：成功
 - `node --check web/app.js`：成功
 - `node --check web/chart.js`：成功

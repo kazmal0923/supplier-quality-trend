@@ -31,6 +31,62 @@ class ValidationTest(unittest.TestCase):
     def _valid_row(self) -> dict[str, str]:
         return self._row(SHIIRESAKI_ID="S002", SHIIRESAKI_NM="架空仕入先B")
 
+    def test_integer_quantity_is_valid(self) -> None:
+        records, warnings = parse_monthly_records(
+            (
+                self._file(
+                    self._row(
+                        HENPIN_SU="1",
+                        SYUKKA_SU="25",
+                        DEFECTIVE_RATE="0.04",
+                    )
+                ),
+            )
+        )
+        self.assertEqual(len(records), 1)
+        self.assertEqual(str(records[0].return_quantity), "1")
+        self.assertEqual(str(records[0].shipment_quantity), "25")
+        self.assertFalse(
+            any(warning.code.startswith("INVALID_") for warning in warnings)
+        )
+
+    def test_decimal_notation_integer_quantities_are_valid(self) -> None:
+        records, warnings = parse_monthly_records(
+            (
+                self._file(
+                    self._row(
+                        HENPIN_SU="1.0",
+                        SYUKKA_SU="2.00",
+                        DEFECTIVE_RATE="0.5",
+                    )
+                ),
+            )
+        )
+        self.assertEqual(len(records), 1)
+        self.assertEqual(str(records[0].return_quantity), "1.0")
+        self.assertEqual(str(records[0].shipment_quantity), "2.00")
+        self.assertFalse(
+            any(warning.code.startswith("INVALID_") for warning in warnings)
+        )
+
+    def test_non_integer_quantities_exclude_row_with_warnings(self) -> None:
+        records, warnings = parse_monthly_records(
+            (
+                self._file(
+                    self._row(HENPIN_SU="1.5", SYUKKA_SU="0.25"),
+                    self._valid_row(),
+                ),
+            )
+        )
+        self.assertEqual([record.supplier_id for record in records], ["S002"])
+        self.assertEqual(
+            [
+                (warning.column_name, warning.raw_value)
+                for warning in warnings
+            ],
+            [("HENPIN_SU", "1.5"), ("SYUKKA_SU", "0.25")],
+        )
+
     def test_empty_henpin_su_excludes_row_with_warning_details(self) -> None:
         records, warnings = parse_monthly_records(
             (self._file(self._row(HENPIN_SU=""), self._valid_row()),)
@@ -119,6 +175,17 @@ class ValidationTest(unittest.TestCase):
         )
         self.assertIn(
             "DEFECTIVE_RATE_MISMATCH",
+            {warning.code for warning in warnings},
+        )
+
+    def test_empty_defective_rate_warns_and_keeps_row(self) -> None:
+        records, warnings = parse_monthly_records(
+            (self._file(self._row(DEFECTIVE_RATE="")),)
+        )
+        self.assertEqual(len(records), 1)
+        self.assertIsNone(records[0].source_rate)
+        self.assertIn(
+            "INVALID_DEFECTIVE_RATE",
             {warning.code for warning in warnings},
         )
 
