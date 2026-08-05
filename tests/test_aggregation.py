@@ -6,7 +6,10 @@ import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from supplier_quality_trend.aggregation import aggregate_dashboard
+from supplier_quality_trend.aggregation import (
+    aggregate_dashboard,
+    supplier_id_sort_key,
+)
 from supplier_quality_trend.models import AliasRule, NormalizedRecord
 from supplier_quality_trend.periods import (
     find_month,
@@ -289,6 +292,32 @@ class AggregationTest(unittest.TestCase):
         )
         current = find_month(entity, "2026-02")
         self.assertIn("in_progress", current.statuses)
+
+    def test_supplier_entities_are_ordered_by_numeric_id(self) -> None:
+        result = aggregate_dashboard(
+            (
+                _record("2026-01", "176", "架空海外B", "1", "100", category="海外仕入れ"),
+                _record("2026-01", "17", "架空国内A", "1", "100"),
+                _record("2026-01", "169", "架空海外A", "1", "100", category="海外仕入れ"),
+                _record("2026-01", "104", "架空国内B", "1", "100"),
+                _record("2026-01", "A10", "架空記号", "1", "100"),
+            ),
+            {},
+            generated_at=datetime(2026, 2, 1, tzinfo=timezone.utc),
+        )
+        supplier_ids = [
+            entity.supplier_ids[0]
+            for entity in result.entities
+            if entity.entity_type == "supplier"
+        ]
+        self.assertEqual(supplier_ids, ["17", "104", "169", "176", "A10"])
+
+    def test_supplier_id_sort_key_puts_non_numeric_after_numeric(self) -> None:
+        ordered = sorted(
+            ["176", "17", "A10", "104", "B2"],
+            key=supplier_id_sort_key,
+        )
+        self.assertEqual(ordered, ["17", "104", "176", "A10", "B2"])
 
 
 if __name__ == "__main__":
