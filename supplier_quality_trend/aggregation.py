@@ -285,15 +285,11 @@ def aggregate_dashboard(
             }
         )
         supplier_names = tuple(
-            sorted(
-                {
-                    max(
-                        records_by_supplier[supplier_id],
-                        key=lambda item: item.target_month,
-                    ).current_name
-                    for supplier_id in supplier_ids
-                }
-            )
+            max(
+                records_by_supplier[supplier_id],
+                key=lambda item: item.target_month,
+            ).current_name
+            for supplier_id in supplier_ids
         )
         entities.append(
             DashboardEntity(

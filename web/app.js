@@ -79,7 +79,23 @@ function entityLabel(entity) {
       elements.mode.value,
     );
   }
+  if (entity.entityType === "group") {
+    const members = formatGroupMemberSummary(entity);
+    return `[${entity.category || "区分未登録"}] ${entity.displayName}（${members}）`;
+  }
   return `[${entity.category || "区分未登録"}] ${entity.displayName}`;
+}
+
+function formatGroupMemberSummary(entity, limit = 5) {
+  const ids = [...(entity.supplierIds ?? [])].sort((left, right) => {
+    const leftKey = supplierIdSortKey(left);
+    const rightKey = supplierIdSortKey(right);
+    if (leftKey[0] !== rightKey[0]) return leftKey[0] - rightKey[0];
+    if (leftKey[0] === 0) return leftKey[1] - rightKey[1];
+    return leftKey[2].localeCompare(rightKey[2], "ja");
+  });
+  if (ids.length <= limit) return ids.join(", ");
+  return `${ids.slice(0, limit).join(", ")} 他${ids.length - limit}件`;
 }
 
 function supplierIdSortKey(supplierId) {
