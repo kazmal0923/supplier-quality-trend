@@ -73,6 +73,25 @@ function entityLabel(entity) {
   return `[${entity.category || "区分未登録"}] ${entity.displayName}`;
 }
 
+function supplierIdSortKey(supplierId) {
+  const trimmed = String(supplierId).trim();
+  if (/^\d+$/.test(trimmed)) {
+    return [0, Number(trimmed), ""];
+  }
+  return [1, 0, trimmed];
+}
+
+function compareEntitiesForOptions(left, right) {
+  if (left.entityType === "supplier" && right.entityType === "supplier") {
+    const leftKey = supplierIdSortKey(left.supplierIds[0]);
+    const rightKey = supplierIdSortKey(right.supplierIds[0]);
+    if (leftKey[0] !== rightKey[0]) return leftKey[0] - rightKey[0];
+    if (leftKey[0] === 0) return leftKey[1] - rightKey[1];
+    return leftKey[2].localeCompare(rightKey[2], "ja");
+  }
+  return entityLabel(left).localeCompare(entityLabel(right), "ja");
+}
+
 function filteredEntities() {
   const mode = elements.mode.value;
   const category = elements.category.value;
@@ -108,7 +127,9 @@ function updateCategoryOptions() {
 
 function updateEntityOptions() {
   const current = elements.entity.value;
-  const candidates = filteredEntities();
+  const candidates = filteredEntities()
+    .slice()
+    .sort(compareEntitiesForOptions);
   elements.entity.replaceChildren(
     ...candidates.map(
       (entity) => new Option(entityLabel(entity), entity.entityId),

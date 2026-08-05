@@ -22,6 +22,15 @@ TARGET_RATE = Decimal("0.01")
 ABNORMAL_RATE = Decimal("1")
 
 
+def supplier_id_sort_key(supplier_id: str) -> tuple[int, int, str]:
+    """仕入先IDの表示・出力順キー。数字のみは数値昇順、それ以外は後段で文字列順。"""
+
+    trimmed = supplier_id.strip()
+    if trimmed.isdigit():
+        return (0, int(trimmed), "")
+    return (1, 0, trimmed)
+
+
 def _month_index(value: str) -> int:
     year, month = (int(part) for part in value.split("-"))
     return year * 12 + month - 1
@@ -221,7 +230,10 @@ def aggregate_dashboard(
         records_by_supplier[record.supplier_id].append(record)
 
     entities: list[DashboardEntity] = []
-    for supplier_id, supplier_records in sorted(records_by_supplier.items()):
+    for supplier_id, supplier_records in sorted(
+        records_by_supplier.items(),
+        key=lambda item: supplier_id_sort_key(item[0]),
+    ):
         latest_record = max(supplier_records, key=lambda item: item.target_month)
         entities.append(
             DashboardEntity(
@@ -262,7 +274,9 @@ def aggregate_dashboard(
         group_members[key].add(supplier_id)
 
     for key in sorted(group_members):
-        supplier_ids = tuple(sorted(group_members[key]))
+        supplier_ids = tuple(
+            sorted(group_members[key], key=supplier_id_sort_key)
+        )
         categories = sorted(
             {
                 record.category

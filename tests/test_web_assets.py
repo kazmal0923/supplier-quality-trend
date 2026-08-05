@@ -23,6 +23,12 @@ class WebAssetsTest(unittest.TestCase):
             chart_source,
         )
 
+    def test_entity_options_use_numeric_supplier_id_sort(self) -> None:
+        app_source = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function supplierIdSortKey(supplierId)", app_source)
+        self.assertIn(".sort(compareEntitiesForOptions)", app_source)
+        self.assertIn(r"/^\d+$/.test(trimmed)", app_source)
+
 
 if __name__ == "__main__":
     unittest.main()
