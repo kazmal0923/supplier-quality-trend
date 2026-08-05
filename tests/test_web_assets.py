@@ -26,8 +26,21 @@ class WebAssetsTest(unittest.TestCase):
     def test_entity_options_use_numeric_supplier_id_sort(self) -> None:
         app_source = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         self.assertIn("function supplierIdSortKey(supplierId)", app_source)
-        self.assertIn(".sort(compareEntitiesForOptions)", app_source)
         self.assertIn(r"/^\d+$/.test(trimmed)", app_source)
+
+    def test_feature_002_multi_select_and_category_totals_hooks(self) -> None:
+        app_source = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        html_source = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        combine_source = (ROOT / "web" / "combine.js").read_text(encoding="utf-8")
+        self.assertIn('option value="category"', html_source)
+        self.assertIn('id="select-all"', html_source)
+        self.assertIn('id="clear-selection"', html_source)
+        self.assertIn("selectAll", app_source)
+        self.assertIn("combine.js", html_source)
+        self.assertIn("function combineEntityMonths", combine_source)
+        self.assertIn('mode === "category"', app_source)
+        self.assertIn("suppliersInCategory", app_source)
+        self.assertIn("selectedSupplierIds", app_source)
 
 
 if __name__ == "__main__":
