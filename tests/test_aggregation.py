@@ -158,6 +158,27 @@ class AggregationTest(unittest.TestCase):
         self.assertEqual(group.supplier_ids, ("S001", "S002"))
         self.assertEqual(group.supplier_names, ("架空名A", "架空名B"))
 
+    def test_group_member_names_align_with_numeric_id_order(self) -> None:
+        aliases = {
+            "架空名Z": AliasRule("統合グループ", "架空名Z", ""),
+            "架空名A": AliasRule("統合グループ", "架空名A", ""),
+        }
+        result = aggregate_dashboard(
+            (
+                _record("2026-01", "176", "架空名Z", "1", "10"),
+                _record("2026-01", "17", "架空名A", "1", "90"),
+            ),
+            aliases,
+            generated_at=datetime(2026, 2, 1, tzinfo=timezone.utc),
+        )
+        group = next(
+            item for item in result.entities
+            if item.entity_type == "group"
+            and item.display_name == "統合グループ"
+        )
+        self.assertEqual(group.supplier_ids, ("17", "176"))
+        self.assertEqual(group.supplier_names, ("架空名A", "架空名Z"))
+
     def test_latest_thirteen_months_include_missing_months(self) -> None:
         result = aggregate_dashboard(
             (_record("2026-02", "S001", "架空仕入先A", "1", "100"),),

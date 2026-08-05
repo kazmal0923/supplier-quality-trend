@@ -42,6 +42,12 @@ class WebAssetsTest(unittest.TestCase):
         self.assertIn("suppliersInCategory", app_source)
         self.assertIn("selectedSupplierIds", app_source)
 
+    def test_group_labels_include_member_supplier_ids(self) -> None:
+        app_source = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("function formatGroupMemberSummary", app_source)
+        self.assertIn("他${ids.length - limit}件", app_source)
+        self.assertIn('entity.entityType === "group"', app_source)
+
 
 if __name__ == "__main__":
     unittest.main()
