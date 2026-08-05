@@ -4,6 +4,8 @@ const state = {
   dashboard: null,
   updateStatus: null,
   selectedEntity: null,
+  selectedSupplierIds: [],
+  selectedCategoryTotal: "",
 };
 
 const elements = {};
@@ -67,8 +69,15 @@ function summarizePeriod(months) {
 }
 
 function entityLabel(entity) {
+  if (!entity) return "表示対象なし";
   if (entity.entityType === "supplier") {
     return `[${entity.category || "区分未登録"}] ${entity.supplierIds[0]}｜${entity.displayName}`;
+  }
+  if (entity.entityType === "combined") {
+    return window.SupplierQualityCombine.labelCombinedSelection(
+      entity,
+      elements.mode.value,
+    );
   }
   return `[${entity.category || "区分未登録"}] ${entity.displayName}`;
 }
@@ -92,32 +101,85 @@ function compareEntitiesForOptions(left, right) {
   return entityLabel(left).localeCompare(entityLabel(right), "ja");
 }
 
-function filteredEntities() {
-  const mode = elements.mode.value;
+function supplierEntities() {
+  return (state.dashboard?.entities ?? []).filter(
+    (entity) => entity.entityType === "supplier",
+  );
+}
+
+function filteredSupplierCandidates() {
   const category = elements.category.value;
   const query = elements.search.value.trim().toLowerCase();
-  return state.dashboard.entities.filter((entity) => {
-    if (entity.entityType !== mode) return false;
-    if (category && !entity.category.split("／").includes(category)) return false;
-    if (!query) return true;
-    const searchable = [
-      entity.displayName,
-      ...entity.supplierIds,
-      ...(entity.supplierNames ?? []),
-    ].join(" ").toLowerCase();
-    return searchable.includes(query);
-  });
+  return supplierEntities()
+    .filter((entity) => {
+      if (category && !entity.category.split("／").includes(category)) {
+        return false;
+      }
+      if (!query) return true;
+      const searchable = [
+        entity.displayName,
+        ...entity.supplierIds,
+        ...(entity.supplierNames ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return searchable.includes(query);
+    })
+    .slice()
+    .sort(compareEntitiesForOptions);
+}
+
+function filteredGroupCandidates() {
+  const category = elements.category.value;
+  const query = elements.search.value.trim().toLowerCase();
+  return (state.dashboard?.entities ?? [])
+    .filter((entity) => {
+      if (entity.entityType !== "group") return false;
+      if (category && !entity.category.split("／").includes(category)) {
+        return false;
+      }
+      if (!query) return true;
+      const searchable = [
+        entity.displayName,
+        ...entity.supplierIds,
+        ...(entity.supplierNames ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return searchable.includes(query);
+    })
+    .slice()
+    .sort(compareEntitiesForOptions);
+}
+
+function categoryTotalOptions() {
+  return [...new Set(
+    supplierEntities().flatMap((entity) =>
+      entity.category.split("／").filter(Boolean),
+    ),
+  )].sort();
+}
+
+function suppliersInCategory(category) {
+  return supplierEntities().filter((entity) =>
+    entity.category.split("／").includes(category),
+  );
 }
 
 function updateCategoryOptions() {
   const current = elements.category.value;
   const mode = elements.mode.value;
-  const categories = [...new Set(
-    state.dashboard.entities
-      .filter((entity) => entity.entityType === mode)
-      .flatMap((entity) => entity.category.split("／"))
-      .filter(Boolean),
-  )].sort();
+  let categories = [];
+  if (mode === "supplier" || mode === "category") {
+    categories = categoryTotalOptions();
+  } else {
+    categories = [...new Set(
+      (state.dashboard?.entities ?? [])
+        .filter((entity) => entity.entityType === "group")
+        .flatMap((entity) => entity.category.split("／"))
+        .filter(Boolean),
+    )].sort();
+  }
   elements.category.replaceChildren(
     new Option("すべて", ""),
     ...categories.map((category) => new Option(category, category)),
@@ -125,23 +187,146 @@ function updateCategoryOptions() {
   if (categories.includes(current)) elements.category.value = current;
 }
 
-function updateEntityOptions() {
-  const current = elements.entity.value;
-  const candidates = filteredEntities()
-    .slice()
-    .sort(compareEntitiesForOptions);
-  elements.entity.replaceChildren(
-    ...candidates.map(
-      (entity) => new Option(entityLabel(entity), entity.entityId),
-    ),
+function setControlVisibility() {
+  const mode = elements.mode.value;
+  const supplierMode = mode === "supplier";
+  const categoryMode = mode === "category";
+
+  elements.entityCheckboxesField.hidden = !supplierMode;
+  elements.entityField.hidden = supplierMode;
+  elements.categoryField.hidden = categoryMode;
+  elements.searchField.hidden = categoryMode;
+  elements.entityLabel.textContent = categoryMode
+    ? "合算区分"
+    : "仕入先／グループ";
+}
+
+function updateEntityCheckboxes() {
+  const candidates = filteredSupplierCandidates();
+  const selected = new Set(state.selectedSupplierIds);
+  elements.entityCheckboxes.replaceChildren(
+    ...candidates.map((entity) => {
+      const supplierId = entity.supplierIds[0];
+      const label = document.createElement("label");
+      label.className = "entity-check";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = supplierId;
+      input.checked = selected.has(supplierId);
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          if (!state.selectedSupplierIds.includes(supplierId)) {
+            state.selectedSupplierIds.push(supplierId);
+          }
+        } else {
+          state.selectedSupplierIds = state.selectedSupplierIds.filter(
+            (item) => item !== supplierId,
+          );
+        }
+        syncSelectionFromControls();
+      });
+      const text = document.createElement("span");
+      text.textContent = entityLabel(entity);
+      label.append(input, text);
+      return label;
+    }),
   );
-  if (candidates.some((entity) => entity.entityId === current)) {
-    elements.entity.value = current;
+}
+
+function updateEntitySelect() {
+  const mode = elements.mode.value;
+  if (mode === "group") {
+    const candidates = filteredGroupCandidates();
+    const current = elements.entity.value;
+    elements.entity.replaceChildren(
+      ...candidates.map(
+        (entity) => new Option(entityLabel(entity), entity.entityId),
+      ),
+    );
+    if (candidates.some((entity) => entity.entityId === current)) {
+      elements.entity.value = current;
+    }
+    return;
   }
-  state.selectedEntity = state.dashboard.entities.find(
-    (entity) => entity.entityId === elements.entity.value,
-  ) ?? null;
+  if (mode === "category") {
+    const current =
+      state.selectedCategoryTotal || elements.entity.value;
+    const categories = categoryTotalOptions();
+    elements.entity.replaceChildren(
+      ...categories.map((category) => new Option(category, category)),
+    );
+    if (categories.includes(current)) {
+      elements.entity.value = current;
+      state.selectedCategoryTotal = current;
+    } else if (categories.length) {
+      elements.entity.value = categories[0];
+      state.selectedCategoryTotal = categories[0];
+    } else {
+      state.selectedCategoryTotal = "";
+    }
+  }
+}
+
+function buildSelectedEntity() {
+  const mode = elements.mode.value;
+  if (mode === "group") {
+    return (
+      state.dashboard.entities.find(
+        (entity) => entity.entityId === elements.entity.value,
+      ) ?? null
+    );
+  }
+  if (mode === "category") {
+    const category = state.selectedCategoryTotal || elements.entity.value;
+    if (!category) return null;
+    const combined = window.SupplierQualityCombine.combineEntityMonths(
+      suppliersInCategory(category),
+    );
+    if (!combined) return null;
+    combined.displayName = `${category} 合算`;
+    combined.category = category;
+    return combined;
+  }
+  const selected = state.selectedSupplierIds
+    .map((supplierId) =>
+      supplierEntities().find(
+        (entity) => entity.supplierIds[0] === supplierId,
+      ),
+    )
+    .filter(Boolean)
+    .sort(compareEntitiesForOptions);
+  if (!selected.length) return null;
+  if (selected.length === 1) return selected[0];
+  const combined = window.SupplierQualityCombine.combineEntityMonths(selected);
+  combined.displayName = window.SupplierQualityCombine.labelCombinedSelection(
+    combined,
+    mode,
+  );
+  return combined;
+}
+
+function syncSelectionFromControls() {
+  if (elements.mode.value === "category") {
+    state.selectedCategoryTotal = elements.entity.value;
+  }
+  state.selectedEntity = buildSelectedEntity();
   render();
+}
+
+function refreshSelectors() {
+  setControlVisibility();
+  updateCategoryOptions();
+  if (elements.mode.value === "supplier") {
+    state.selectedSupplierIds = state.selectedSupplierIds.filter((supplierId) =>
+      supplierEntities().some(
+        (entity) => entity.supplierIds[0] === supplierId,
+      ),
+    );
+    updateEntityCheckboxes();
+  } else {
+    updateEntitySelect();
+  }
+  syncSelectionFromControls();
 }
 
 function statusLabels(month) {
@@ -231,7 +416,12 @@ function clearDashboard(message) {
 function render() {
   const entity = state.selectedEntity;
   if (!entity) {
-    clearDashboard("条件に一致する仕入先またはグループがありません。");
+    const mode = elements.mode.value;
+    clearDashboard(
+      mode === "supplier"
+        ? "仕入先を1件以上選択してください。"
+        : "条件に一致する仕入先またはグループがありません。",
+    );
     return;
   }
   if (elements.startMonth.value > elements.endMonth.value) {
@@ -291,8 +481,7 @@ async function loadDashboard() {
   );
   elements.startMonth.value = state.dashboard.defaultPeriod.startMonth;
   elements.endMonth.value = state.dashboard.defaultPeriod.endMonth;
-  updateCategoryOptions();
-  updateEntityOptions();
+  refreshSelectors();
 }
 
 function bindElements() {
@@ -301,7 +490,8 @@ function bindElements() {
     "search", "entity", "start-month", "end-month", "screen-message",
     "latest-rate", "previous-rate", "rate-difference", "latest-returns",
     "latest-shipments", "period-rate", "selected-entity-name", "trend-chart",
-    "detail-body",
+    "detail-body", "entity-checkboxes", "select-all", "clear-selection", "entity-label",
+    "category-field", "search-field", "entity-field", "entity-checkboxes-field",
   ];
   ids.forEach((id) => {
     const key = id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -311,16 +501,42 @@ function bindElements() {
 
 function bindEvents() {
   elements.mode.addEventListener("change", () => {
-    updateCategoryOptions();
-    updateEntityOptions();
+    state.selectedSupplierIds = [];
+    state.selectedCategoryTotal = "";
+    refreshSelectors();
   });
-  elements.category.addEventListener("change", updateEntityOptions);
-  elements.search.addEventListener("input", updateEntityOptions);
-  elements.entity.addEventListener("change", () => {
-    state.selectedEntity = state.dashboard.entities.find(
-      (entity) => entity.entityId === elements.entity.value,
-    ) ?? null;
-    render();
+  elements.category.addEventListener("change", () => {
+    if (elements.mode.value === "supplier") {
+      updateEntityCheckboxes();
+      syncSelectionFromControls();
+      return;
+    }
+    refreshSelectors();
+  });
+  elements.search.addEventListener("input", () => {
+    if (elements.mode.value === "supplier") {
+      updateEntityCheckboxes();
+      return;
+    }
+    refreshSelectors();
+  });
+  elements.entity.addEventListener("change", syncSelectionFromControls);
+  elements.selectAll.addEventListener("click", () => {
+    const visibleIds = filteredSupplierCandidates().map(
+      (entity) => entity.supplierIds[0],
+    );
+    const selected = new Set(state.selectedSupplierIds);
+    for (const supplierId of visibleIds) {
+      selected.add(supplierId);
+    }
+    state.selectedSupplierIds = [...selected];
+    updateEntityCheckboxes();
+    syncSelectionFromControls();
+  });
+  elements.clearSelection.addEventListener("click", () => {
+    state.selectedSupplierIds = [];
+    updateEntityCheckboxes();
+    syncSelectionFromControls();
   });
   elements.startMonth.addEventListener("change", render);
   elements.endMonth.addEventListener("change", render);

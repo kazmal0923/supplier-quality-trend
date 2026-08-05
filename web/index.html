@@ -30,21 +30,32 @@
         <div class="field">
           <label for="mode">閲覧モード</label>
           <select id="mode">
-            <option value="supplier">単一仕入先</option>
+            <option value="supplier">仕入先（複数選択）</option>
             <option value="group">仕入先グループ</option>
+            <option value="category">国内／海外合算</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field" id="category-field">
           <label for="category">国内／海外</label>
           <select id="category"><option value="">すべて</option></select>
         </div>
-        <div class="field field-wide">
+        <div class="field field-wide" id="search-field">
           <label for="search">仕入先ID・名称検索</label>
           <input id="search" type="search" placeholder="IDまたは名称">
         </div>
-        <div class="field field-wide">
-          <label for="entity">仕入先／グループ</label>
+        <div class="field field-wide" id="entity-field">
+          <label for="entity" id="entity-label">仕入先／グループ</label>
           <select id="entity"></select>
+        </div>
+        <div class="field field-full" id="entity-checkboxes-field">
+          <div class="entity-checkboxes-heading">
+            <span>仕入先（複数選択可・国内／海外またぎ可）</span>
+            <span class="entity-checkboxes-actions">
+              <button type="button" id="select-all" class="link-button">全選択</button>
+              <button type="button" id="clear-selection" class="link-button">選択解除</button>
+            </span>
+          </div>
+          <div id="entity-checkboxes" class="entity-checkboxes" role="group" aria-label="仕入先複数選択"></div>
         </div>
         <div class="field">
           <label for="start-month">開始月</label>
@@ -100,6 +111,7 @@
     </main>
 
     <script src="vendor/echarts/echarts.min.js"></script>
+    <script src="combine.js"></script>
     <script src="chart.js"></script>
     <script src="app.js"></script>
   </body>

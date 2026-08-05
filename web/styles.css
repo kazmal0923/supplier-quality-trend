@@ -47,8 +47,51 @@ main { width: min(1400px, calc(100% - 2rem)); margin: .75rem auto 1.5rem; }
 .controls { display: grid; grid-template-columns: repeat(6, minmax(8rem, 1fr)); gap: .65rem; padding: .75rem; margin-top: .65rem; }
 .field { display: grid; gap: .25rem; }
 .field-wide { grid-column: span 2; }
+.field-full { grid-column: 1 / -1; }
 .field label { color: var(--muted); font-size: .75rem; font-weight: 700; }
 .field input, .field select { width: 100%; padding: .45rem .55rem; border: 1px solid var(--line); border-radius: .45rem; background: white; }
+.entity-checkboxes-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 700;
+}
+.entity-checkboxes-actions {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+.link-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--brand);
+  font-weight: 700;
+  cursor: pointer;
+}
+.entity-checkboxes {
+  max-height: 9.5rem;
+  overflow: auto;
+  margin-top: .35rem;
+  padding: .45rem .55rem;
+  border: 1px solid var(--line);
+  border-radius: .45rem;
+  background: white;
+  display: grid;
+  gap: .2rem;
+}
+.entity-check {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.entity-check input { margin-top: .15rem; width: auto; }
 .screen-message { min-height: 1.25rem; margin: .45rem .25rem; color: var(--warning); font-weight: 700; font-size: .92rem; }
 .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(8rem, 1fr)); gap: .5rem; margin: .65rem 0; }
 .kpi { padding: .65rem .75rem; }
