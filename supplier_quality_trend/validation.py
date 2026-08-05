@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Iterable
 
@@ -9,6 +10,19 @@ from supplier_quality_trend.models import MonthlyRecord, WarningItem
 from supplier_quality_trend.monthly_csv import MonthlyCsvData
 
 DEFECTIVE_RATE_TOLERANCE = Decimal("1E-12")
+JST = timezone(timedelta(hours=9))
+
+
+def resolve_run_month(moment: datetime) -> str:
+    """実行日時を日本時間へ変換し、対象年月 YYYY-MM を返す。"""
+
+    aware = (
+        moment.replace(tzinfo=timezone.utc)
+        if moment.tzinfo is None
+        else moment
+    )
+    local = aware.astimezone(JST)
+    return f"{local.year:04d}-{local.month:02d}"
 
 
 class ValidationError(ValueError):
@@ -195,15 +209,36 @@ def _parse_monthly_row(
 
 def parse_monthly_records(
     files: Iterable[MonthlyCsvData],
+    *,
+    run_month: str,
 ) -> tuple[tuple[MonthlyRecord, ...], tuple[WarningItem, ...]]:
-    """CSV文字列を型変換し、継続可能な不正値を警告へ変換する。"""
+    """CSV文字列を型変換し、継続可能な不正値を警告へ変換する。
+
+    実行日（日本時間）の当月CSVがヘッダー行のみの場合は、
+    EMPTY_CURRENT_MONTH_FILE警告を残して集計対象外とし処理を継続する。
+    過去月の空CSV、およびデータ行はあるが有効行0件の月は処理失敗とする。
+    """
 
     records: list[MonthlyRecord] = []
     warnings: list[WarningItem] = []
     for monthly_file in files:
         file_records: list[MonthlyRecord] = []
         file_warnings: list[WarningItem] = []
+        is_current_month = monthly_file.target_month == run_month
         if not monthly_file.rows:
+            if is_current_month:
+                warnings.append(
+                    WarningItem(
+                        code="EMPTY_CURRENT_MONTH_FILE",
+                        message=(
+                            "Current month CSV contains no data rows "
+                            "and was excluded"
+                        ),
+                        target_month=monthly_file.target_month,
+                        source_file=monthly_file.source_path.name,
+                    )
+                )
+                continue
             file_warnings.append(
                 WarningItem(
                     code="EMPTY_MONTHLY_FILE",
@@ -211,6 +246,10 @@ def parse_monthly_records(
                     target_month=monthly_file.target_month,
                     source_file=monthly_file.source_path.name,
                 )
+            )
+            raise ValidationError(
+                f"No valid data rows: {monthly_file.source_path.name}",
+                tuple(file_warnings),
             )
         for line_number, row in enumerate(monthly_file.rows, start=2):
             record, row_warnings = _parse_monthly_row(
@@ -228,5 +267,8 @@ def parse_monthly_records(
             )
         records.extend(file_records)
         warnings.extend(file_warnings)
+
+    if not records:
+        raise ValidationError("No valid data rows", tuple(warnings))
 
     return tuple(records), tuple(warnings)

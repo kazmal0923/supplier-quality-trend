@@ -43,6 +43,10 @@ ExcelとWebアプリの集計結果を比較する検証データと結果を記
 - 項目数不足行の空文字変換、行除外、有効行0件
 - 両数量不正時のカラム別警告と1回だけの行除外
 - 月次CSV内の有効行0件による更新失敗と前回正常JSON維持
+- 当月CSVがヘッダーのみでも処理成功、`EMPTY_CURRENT_MONTH_FILE`警告のJSON出力、前月までの集計生成
+- 過去月CSVがヘッダーのみ、または不正行のみで有効行0件の場合の処理失敗
+- 当月空CSVのみの場合の処理失敗と前回正常JSON維持
+- 当月判定がJST（UTC+9）であること
 - 返品数0
 - 出荷数0（数量保持、不良率`null`、「算出不可」表示、警告）
 - 不良率100％以上
@@ -75,6 +79,12 @@ ExcelとWebアプリの集計結果を比較する検証データと結果を記
 - IISの公開対象が`web/`だけであること
 
 対象ブラウザはMicrosoft Edge、Google Chrome、Mozilla Firefoxの各最新版とする。性能試験条件は未確定とする。
+
+## 2026-08-05 当月空CSV確認
+
+- `python -m unittest discover -s tests -v`：68件成功（当月ヘッダーのみ継続、過去月空／有効行0件失敗、前回JSON維持、JST当月判定を含む）
+- `python -m compileall main.py supplier_quality_trend tests`：成功
+- 実データ再実行・現行Excel比較：未確認
 
 ## 2026-08-04 MVP実装確認
 

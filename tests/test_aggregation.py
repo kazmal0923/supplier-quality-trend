@@ -247,21 +247,40 @@ class AggregationTest(unittest.TestCase):
         self.assertIsNotNone(previous)
         self.assertIn("missing", previous.statuses)
 
-    def test_empty_latest_input_month_keeps_empty_dashboard(self) -> None:
-        result = aggregate_dashboard(
-            (),
-            {},
-            input_months=("2026-02",),
-            generated_at=datetime(2026, 2, 15, tzinfo=timezone.utc),
-        )
-        self.assertEqual(result.latest_data_month, "2026-02")
-        self.assertEqual(result.entities, ())
+    def test_empty_latest_input_month_without_records_fails(self) -> None:
+        with self.assertRaises(ValueError):
+            aggregate_dashboard(
+                (),
+                {},
+                input_months=("2026-02",),
+                generated_at=datetime(2026, 2, 15, tzinfo=timezone.utc),
+            )
 
-    def test_empty_current_month_is_missing_and_in_progress(self) -> None:
+    def test_latest_data_month_uses_valid_records_only(self) -> None:
         result = aggregate_dashboard(
             (_record("2026-01", "S001", "架空仕入先A", "1", "100"),),
             {},
             input_months=("2026-01", "2026-02"),
+            generated_at=datetime(2026, 2, 15, tzinfo=timezone.utc),
+        )
+        self.assertEqual(result.latest_data_month, "2026-01")
+        entity = next(
+            item for item in result.entities
+            if item.entity_id == "supplier:S001"
+        )
+        self.assertEqual(entity.months[-1].target_month, "2026-01")
+        self.assertNotIn(
+            "in_progress",
+            entity.months[-1].statuses,
+        )
+
+    def test_current_month_with_data_is_in_progress(self) -> None:
+        result = aggregate_dashboard(
+            (
+                _record("2026-01", "S001", "架空仕入先A", "1", "100"),
+                _record("2026-02", "S001", "架空仕入先A", "2", "100"),
+            ),
+            {},
             generated_at=datetime(2026, 2, 15, tzinfo=timezone.utc),
         )
         entity = next(
@@ -269,7 +288,6 @@ class AggregationTest(unittest.TestCase):
             if item.entity_id == "supplier:S001"
         )
         current = find_month(entity, "2026-02")
-        self.assertIn("missing", current.statuses)
         self.assertIn("in_progress", current.statuses)
 
 
