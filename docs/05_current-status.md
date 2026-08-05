@@ -33,7 +33,7 @@ Pythonバッチ、静的Web、Apache ECharts、Windows実行バッチ、自動�
 | Pull Request運用 | 整備済み   | PRテンプレートを追加                                   |
 | 環境変数管理         | 初期整備済み | 現時点で必須環境変数なし                                  |
 | アプリ実装          | MVP実装済み    | Pythonバッチ、静的Web、`run.bat`を実装                                    |
-| テスト            | 自動テスト済み   | 匿名データによる58件の`unittest`が成功                                 |
+| テスト            | 自動テスト済み   | 匿名データによる68件の`unittest`が成功                                 |
 | 型チェック          | 専用ツールなし   | 型ヒントを使用し、`compileall`で構文確認                                 |
 | Lint           | 診断済み   | IDE診断でエラーなし                                 |
 | ビルド            | 該当なし   | ビルド工程を持たない静的構成                                 |
@@ -41,6 +41,13 @@ Pythonバッチ、静的Web、Apache ECharts、Windows実行バッチ、自動�
 ---
 
 ## 2026-08-03時点の完了事項
+
+### 2026-08-05 当月空CSVの警告継続
+
+- 実行日（JST）の当月CSVがヘッダー行のみの場合は`EMPTY_CURRENT_MONTH_FILE`警告を残して処理継続
+- 空の当月は集計対象外とし、最新データ月は有効レコードがある最新月とする
+- 過去月の空CSV・有効行0件、当月の不正行のみ0件は従来どおり処理失敗
+- 当月空CSVのみの場合は処理失敗し、前回正常JSONを維持
 
 ### 2026-08-04 MVP実装
 
@@ -190,7 +197,7 @@ IISの実URL、アクセス権、タスク実行アカウントを確定し、`w
 
 ## 現在の検証状況
 
-- `python -m unittest discover -s tests -v`：58件成功
+- `python -m unittest discover -s tests -v`：68件成功
 - `python -m compileall main.py supplier_quality_trend tests`：成功
 - `node --check web/app.js`、`node --check web/chart.js`：成功
 - ローカルHTTP配信：画面、匿名サンプルJSON、ローカルEChartsがHTTP 200
@@ -258,3 +265,4 @@ IISの実URL、アクセス権、タスク実行アカウントを確定し、`w
 | 2026-08-03 | Pull Request #1を通じて反映内容を`main`へ統合 |
 | 2026-08-03 | アプリおよびプロジェクトの名称を「仕入先品質トレンド」に統一 |
 | 2026-08-03 | MVP基本設計を確定し、業務仕様・データ仕様・技術構成・受入条件を更新 |
+| 2026-08-05 | 当月ヘッダーのみCSVを警告継続とし、最新データ月・JST当月判定・関連テストを更新 |

@@ -16,6 +16,7 @@ from supplier_quality_trend.models import (
     NormalizedRecord,
     WarningItem,
 )
+from supplier_quality_trend.validation import resolve_run_month
 
 TARGET_RATE = Decimal("0.01")
 ABNORMAL_RATE = Decimal("1")
@@ -199,27 +200,21 @@ def aggregate_dashboard(
 
     deduplicated, duplicate_warnings = _deduplicate_records(records)
     all_warnings = tuple(warnings) + duplicate_warnings
-    data_months = sorted(
-        {record.target_month for record in deduplicated} | set(input_months)
+    record_months = sorted(
+        {record.target_month for record in deduplicated}
     )
-    if not data_months:
-        raise ValueError("No input months")
-    latest_month = data_months[-1]
+    if not record_months:
+        raise ValueError("No valid data months")
+    latest_month = record_months[-1]
+    data_months = sorted(set(record_months) | set(input_months))
     initial_start = default_start_month(latest_month)
-    all_months = month_sequence(min(data_months[0], initial_start), latest_month)
+    all_months = month_sequence(
+        min(data_months[0], initial_start),
+        latest_month,
+    )
     timestamp = generated_at or datetime.now(timezone.utc)
-    run_month = f"{timestamp.year:04d}-{timestamp.month:02d}"
+    run_month = resolve_run_month(timestamp)
     in_progress_month = latest_month if latest_month == run_month else None
-
-    if not deduplicated:
-        return AggregationResult(
-            generated_at=timestamp,
-            latest_data_month=latest_month,
-            default_start_month=default_start_month(latest_month),
-            default_end_month=latest_month,
-            entities=(),
-            warnings=all_warnings,
-        )
 
     records_by_supplier: dict[str, list[NormalizedRecord]] = defaultdict(list)
     for record in deduplicated:

@@ -14,15 +14,27 @@ from supplier_quality_trend.supplier_master import (
     join_supplier_master,
     read_supplier_master,
 )
-from supplier_quality_trend.validation import parse_monthly_records
+from supplier_quality_trend.validation import (
+    parse_monthly_records,
+    resolve_run_month,
+)
 
 
-def run_pipeline(root: Path) -> None:
+def run_pipeline(
+    root: Path,
+    *,
+    generated_at: datetime | None = None,
+) -> None:
     """入力から画面用JSON生成までを実行する。"""
 
+    timestamp = generated_at or datetime.now(timezone.utc)
+    run_month = resolve_run_month(timestamp)
     settings = load_settings(root / "config" / "settings.json")
     monthly_files = discover_monthly_csvs(settings.monthly_csv_directory)
-    monthly_records, input_warnings = parse_monthly_records(monthly_files)
+    monthly_records, input_warnings = parse_monthly_records(
+        monthly_files,
+        run_month=run_month,
+    )
     supplier_master = read_supplier_master(settings.supplier_master_file)
     normalized_records, master_warnings = join_supplier_master(
         monthly_records,
@@ -35,9 +47,9 @@ def run_pipeline(root: Path) -> None:
         normalized_records,
         alias_rules,
         input_warnings + master_warnings,
-        input_months=(
-            monthly_file.target_month for monthly_file in monthly_files
+        input_months=tuple(
+            sorted({record.target_month for record in monthly_records})
         ),
-        generated_at=datetime.now(timezone.utc),
+        generated_at=timestamp,
     )
     write_success_outputs(root, result)
